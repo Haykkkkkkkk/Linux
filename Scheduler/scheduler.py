@@ -5,8 +5,6 @@ from process import Process
 class MLFQScheduler:
     def __init__(self, num_queues=3, time_slices=[4, 8, 16]):
         """num_queues: number of queue levels"""
-        
-        
         self.num_queues = num_queues
         self.time_slices = time_slices
  
@@ -17,11 +15,7 @@ class MLFQScheduler:
         self.pending_processes = []
  
         self.current_time = 0
- 
-        # For calculating statistics
-        self.total_wait_time = 0
-        self.total_turnaround_time = 0
-        self.process_count = 0
+
  
     def add_process(self, process):
         """
@@ -29,7 +23,6 @@ class MLFQScheduler:
         When current_time reaches arrival_time, move it to queue[0].
         """
         self.pending_processes.append(process)
-        self.process_count += 1
         print(f"[PEND] Process {process.pid} scheduled (arrival_time={process.arrival_time})")
  
     def check_arrivals(self):
@@ -122,18 +115,11 @@ class MLFQScheduler:
 
             if proc.status == "Finished":
                 print(f"[FINISHED] Process {proc.pid} finished at {self.current_time}s")
-                turnaround = self.current_time - proc.arrival_time
-                self.total_turnaround_time += turnaround
-                # waiting_time = turnaround - burst_time, but here we
-                # accumulate separately in processes; this can be calculated otherwise.
             elif proc.needs_io():
-                # Goes to Waiting
                 proc.status = "Waiting"
                 print(f"[WAITING] Process {proc.pid} going to wait for I/O")
                 self.queues[level].append(proc)
             else:
-                # Process is not finished and not waiting for I/O
-                # Check if the quantum is exhausted (time_in_current_queue >= quantum).
                 if proc.time_in_current_queue >= quantum:
                     # Lower priority
                     if level < self.num_queues - 1:
@@ -142,9 +128,7 @@ class MLFQScheduler:
                         proc.time_in_current_queue = 0  # reset the quantum counter
                         self.queues[proc.queue_level].append(proc)
                     else:
-                        # Stays at the same level if it's the lowest queue
                         self.queues[level].append(proc)
                 else:
-                    # Quantum not exhausted, return the process to the same queue
                     self.queues[level].append(proc)
  

@@ -6,10 +6,9 @@ class Process:
         self.burst_time = burst_time
         self.remaining_time = burst_time
         self.arrival_time = arrival_time
- 
-        self.waiting_time = 0      # For statistics and Aging mechanism
+        self.waiting_time = 0      
         self.status = "Ready"      # Ready, Running, Waiting, Finished
-        self.queue_level = 0       # Current queue level
+        self.queue_level = 0       
         self.io_burst = randint(0, 3) if randint(0, 1) else 0  # Simulating I/O using random
         self.time_in_current_queue = 0
  
